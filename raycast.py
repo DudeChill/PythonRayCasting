@@ -38,6 +38,8 @@ def square(left,top,color,wi):
     return pygame.draw.rect(screen,color,pygame.Rect(left,top,scale,scale),width=wi)
 
 def grid():
+    walls = []
+    squares = []
     for m in range(len(map)):
         for n in range(len(map[m])):
             if(map[n][m]=="#"):
