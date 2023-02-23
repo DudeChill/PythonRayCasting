@@ -33,8 +33,6 @@ map = [["#", "#", "#", "#", "#", "#", "#", "#", "#", "#"],
        ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#"],
        ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#"]]
 scale = w / len(map)
-gl=[]
-
 def square(left, top, color, wi):
     return pygame.draw.rect(screen, color, pygame.Rect(left, top, scale, scale), width=wi)
 
@@ -47,21 +45,18 @@ def grid():
             else:
                 walls.append(square(scale * m, scale * n, black, 0))
 
-
 screen = pygame.display.set_mode(res, flags, vsync=1)
-
-
 def gridline(walls):
+    gl = []
     for w in walls:
-        gl.append((math.floor(w[0] / scale), math.floor(w[1] / scale)))
+        gl.append((w.left, w.top, w.left+scale, w.top+scale))
     return gl
-
 
 def hit(lineTrig, coord, gl, fx, fy):
     while lineTrig[0] - coord[0] != 0 and lineTrig[1] - coord[1] != 0:
         playerTan = (lineTrig[1] - coord[1]) / (lineTrig[0] - coord[0])
         A = scale / playerTan
-        print(playerTan)
+        print(walls)
         for g in gl:
             if g != (fx, fy):
                 lineTrig[0] += A * (fx - g[0])
@@ -71,17 +66,18 @@ i = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
-    if i<=1:
+    if i <= 1:
         screen.fill(white)
         grid()
         gl = gridline(walls)
-        i+=1
+        i += 1
     A = 0
+    print(len(walls))
     lineTrig = [coord[0] + math.sin(playerAngle) * leg, coord[1] + math.cos(playerAngle) * leg]
     player = pygame.draw.circle(screen, red, coord, 10)
     view = pygame.draw.line(screen, blue, coord, lineTrig, width=2)
-    fx = math.floor(lineTrig[0] / scale) + 1
-    fy = math.floor(lineTrig[1] / scale) + 1
+    fx = math.floor(lineTrig[0] / scale)
+    fy = math.floor(lineTrig[1] / scale)
     hit(lineTrig, coord, gl, fx, fy)
     key_input = pygame.key.get_pressed()
     if key_input[K_UP]:
