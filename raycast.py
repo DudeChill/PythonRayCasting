@@ -13,7 +13,8 @@ black = 0, 0, 0
 red = 255, 0, 0
 blue = 0, 0, 255
 squares = []
-walls = const.walls
+walls = []
+wall = const.walls
 Pi = math.pi
 fov = Pi / 3
 half_fov = fov / 2
@@ -48,10 +49,10 @@ def grid():
                 walls.append(square(scale * m, scale * n, black, 0))
 
 screen = pygame.display.set_mode(res, flags, vsync=1)
-def gridline(walls):
+def gridline(wall):
     gl = []
-    for w in walls:
-        gl.append((w.left, w.top, w.left+scale, w.top+scale))
+    for w in wall:
+        gl.append((w.left/scale, w.top/scale, (w.left/scale)+1, (w.top/scale)+1))
     return gl
     
 def hit(lineTrig, coord, gl):
@@ -60,26 +61,23 @@ def hit(lineTrig, coord, gl):
         playerTan = (lineTrig[1] - coord[1]) / (lineTrig[0] - coord[0])
         gx = scale / playerTan
         gy = scale * playerTan
+        print(gx,gy)
         for g in gl:
-            if lineTrig[0] + gx > g[0] or lineTrig[0] + gx < g[2] or lineTrig[1] + gy > g[1] or lineTrig[1] + gy < [3]:
-                lineTrig[0] = lineTrig[0] + gx
-                lineTrig[1] = lineTrig[1] + gy
+            if lineTrig[0]/scale > g[0] or lineTrig[0]/scale < g[2] or lineTrig[1]/scale > g[1] or lineTrig[1]/scale < [3]:
+                pass
             else:
                 lineTrig[0] += gx
                 lineTrig[1] += gy
                 
-lineTrig = [coord[0] + math.sin(playerAngle) * leg, coord[1] + math.cos(playerAngle) * leg]
-player = pygame.draw.circle(screen, red, coord, 10)
-view = pygame.draw.line(screen, blue, coord, lineTrig, width=2)
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
     screen.fill(white)
     grid()
-    gl = gridline(walls)
+    gl = gridline(wall)
     A = 0
     lineTrig = [coord[0] + math.sin(playerAngle) * leg, coord[1] + math.cos(playerAngle) * leg]
-    print(len(gl))
+    print(lineTrig[0]/scale,lineTrig[1]/scale)
     player = pygame.draw.circle(screen, red, coord, 10)
     view = pygame.draw.line(screen, blue, coord, lineTrig, width=2)
     hit(lineTrig, coord, gl)
