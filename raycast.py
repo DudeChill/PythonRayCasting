@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 import sys
 import math
-
+import const
 pygame.init()
 fps = 144
 fpsclock = pygame.time.Clock()
@@ -13,7 +13,7 @@ black = 0, 0, 0
 red = 255, 0, 0
 blue = 0, 0, 255
 squares = []
-walls = []
+walls = const.walls
 Pi = math.pi
 fov = Pi / 3
 half_fov = fov / 2
@@ -38,6 +38,8 @@ def square(left, top, color, wi):
 
 
 def grid():
+    walls = []
+    squares = []
     for m in range(len(map)):
         for n in range(len(map[m])):
             if (map[n][m] == "#"):
@@ -51,41 +53,47 @@ def gridline(walls):
     for w in walls:
         gl.append((w.left, w.top, w.left+scale, w.top+scale))
     return gl
-
-def hit(lineTrig, coord, gl, fx, fy):
-    while lineTrig[0] - coord[0] != 0 and lineTrig[1] - coord[1] != 0:
+    
+def hit(lineTrig, coord, gl):
+    playerTan = 0
+    if lineTrig[0] - coord[0] != 0 and lineTrig[1] - coord[1] != 0:
         playerTan = (lineTrig[1] - coord[1]) / (lineTrig[0] - coord[0])
-        A = scale / playerTan
-        print(walls)
+        gx = scale / playerTan
+        gy = scale * playerTan
         for g in gl:
-            if g != (fx, fy):
-                lineTrig[0] += A * (fx - g[0])
-                lineTrig[1] += A * (fy - g[1])
-
-i = 0
+            if lineTrig[0] + gx > g[0] or lineTrig[0] + gx < g[2] or lineTrig[1] + gy > g[1] or lineTrig[1] + gy < [3]:
+                lineTrig[0] = lineTrig[0] + gx
+                lineTrig[1] = lineTrig[1] + gy
+            else:
+                lineTrig[0] += gx
+                lineTrig[1] += gy
+                
+lineTrig = [coord[0] + math.sin(playerAngle) * leg, coord[1] + math.cos(playerAngle) * leg]
+player = pygame.draw.circle(screen, red, coord, 10)
+view = pygame.draw.line(screen, blue, coord, lineTrig, width=2)
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
-    if i <= 1:
-        screen.fill(white)
-        grid()
-        gl = gridline(walls)
-        i += 1
+    screen.fill(white)
+    grid()
+    gl = gridline(walls)
     A = 0
-    print(len(walls))
     lineTrig = [coord[0] + math.sin(playerAngle) * leg, coord[1] + math.cos(playerAngle) * leg]
+    print(len(gl))
     player = pygame.draw.circle(screen, red, coord, 10)
     view = pygame.draw.line(screen, blue, coord, lineTrig, width=2)
-    fx = math.floor(lineTrig[0] / scale)
-    fy = math.floor(lineTrig[1] / scale)
-    hit(lineTrig, coord, gl, fx, fy)
+    hit(lineTrig, coord, gl)
     key_input = pygame.key.get_pressed()
     if key_input[K_UP]:
         coord[0] += math.sin(playerAngle) / 2
+        lineTrig[0] = coord[0] + math.sin(playerAngle) * leg
         coord[1] += math.cos(playerAngle) / 2
+        lineTrig[1] = coord[1] + math.cos(playerAngle) * leg
     if key_input[K_DOWN]:
         coord[0] -= math.sin(playerAngle) / 2
+        lineTrig[0] = coord[0] + math.sin(playerAngle) * leg
         coord[1] -= math.cos(playerAngle) / 2
+        lineTrig[1] = coord[1] + math.cos(playerAngle) * leg
     if key_input[K_a]:
         playerAngle += 0.01
         print(playerAngle)
